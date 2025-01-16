@@ -20,7 +20,7 @@ export const e = {
   password: (field) => `${field} deve ser válida`,
   max: (field, max) => `${field} deve ser menor que ${max}`,
   min: (field, min) => `${field} deve ser maior que ${min}`,
-  notAllowed: (field) => `${field} contém campos não identificados`,
+  notAllowed: (local) => `Campo não identificado`,
   passwordConfirmation: (field, ref) =>
     `${field} deve ser igual ao campo ${ref.toLowerCase()}`,
   cnpj: (field) => `${field} deve ser válido`,

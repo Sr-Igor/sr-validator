@@ -9,16 +9,23 @@ export const handleError = (err) => {
     };
 
     const issues = err.issues;
+
     issues.forEach((issue) => {
       const path = issue.path.join(".");
+      const keys = issue?.keys?.join(".");
       const message = issue.message;
 
       if (path.includes("params") && objectError.params) {
-        objectError.params[path.replace("params.", "")] = message;
+        objectError.params[
+          path === "params" ? keys : path.replace("params.", "")
+        ] = message;
       } else if (path.includes("query") && objectError.query) {
-        objectError.query[path.replace("query.", "")] = message;
+        objectError.query[
+          path === "query" ? keys : path.replace("query.", "")
+        ] = message;
       } else if (path.includes("body") && objectError.body) {
-        objectError.body[path.replace("body.", "")] = message;
+        objectError.body[path === "body" ? keys : path.replace("body.", "")] =
+          message;
       }
     });
 
@@ -29,8 +36,6 @@ export const handleError = (err) => {
 
     return objectError;
   } catch (err) {
-    throw new Error(
-      `Ocorreu um erro ao identificar parâmetros de erro. Verifique se as chaves de requisição estão listadas no schema`
-    );
+    console.error(`[VALIDATOR]: ${err}`);
   }
 };

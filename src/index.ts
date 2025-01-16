@@ -5,6 +5,7 @@ import { z } from "zod";
 import schema from "./schema";
 import { e } from "./schema/_internal/handlers/messages";
 import { IValidationParams } from "./schema/_internal/validations/types";
+import { th, tr } from "date-fns/locale";
 
 const validator = (data) => async (req, res, next) => {
   try {
@@ -14,16 +15,37 @@ const validator = (data) => async (req, res, next) => {
     const eachMap = (local) => {
       const objectMapper = {};
 
-      local?.forEach((item) => {
-        const method = schema.f[item.method](item);
+      new Promise((resolve) => {
+        local?.forEach(async (item) => {
+          const funcMethod = schema.f[item.method];
+          if (!funcMethod)
+            throw new Error(`Método "${item.method}" não encontrado!`);
 
-        if (item.optional && item.nullable) {
-          objectMapper[item.name] = method.optional().nullable();
-        } else if (item.optional) {
-          objectMapper[item.name] = method.optional();
-        } else {
-          objectMapper[item.name] = method;
-        }
+          let method;
+          try {
+            method = funcMethod(item);
+          } catch {
+            throw new Error(
+              `Ocorreu um erro na função validadora ${item.method}`
+            );
+          }
+
+          try {
+            if (item.optional && item.nullable) {
+              objectMapper[item.name] = method.optional().nullable();
+            } else if (item.optional) {
+              objectMapper[item.name] = method.optional();
+            } else {
+              objectMapper[item.name] = method;
+            }
+
+            resolve();
+          } catch {
+            throw new Error(
+              `Ocorreu um erro ao fazer inclusão de parâmetros no método ${item.method}`
+            );
+          }
+        });
       });
 
       return objectMapper;
@@ -43,7 +65,7 @@ const validator = (data) => async (req, res, next) => {
       .superRefine((cont, ctx) => {
         const keys = Object.keys(cont);
 
-        keys.forEach((item) => {
+        keys?.forEach((item) => {
           //@ts-ignore
           const optional = bodyObject[item].isOptional();
           //@ts-ignore
@@ -66,7 +88,7 @@ const validator = (data) => async (req, res, next) => {
           }
         });
 
-        schema.refinesBodyServer(cont, ctx, data);
+        // schema.refinesBodyServer(cont, ctx, data);
       });
 
     const query = z.object(queryObject).strict({
@@ -93,7 +115,7 @@ const validator = (data) => async (req, res, next) => {
     });
 
     //Check if the nullable values are empty
-    Object.keys(resolved.body).forEach((item) => {
+    Object.keys(resolved?.body || []).forEach((item) => {
       //@ts-ignore
       const nullable = bodyObject[item].isNullable();
 
@@ -114,12 +136,15 @@ const validator = (data) => async (req, res, next) => {
 
     return next();
   } catch (error) {
-    const objectError = schema.handleError(error);
+    const objectError = error?.issues ? schema.handleError(error) : {};
+    if (!error.issues) {
+      console.error(`[VALIDATOR]: ${error.message}`);
+    }
 
     return res.status(400).send({
       status: 400,
       success: false,
-      error: "Ocorreu um erro ao validar as informações",
+      error: "Estrutura inválida.",
       errors: objectError,
       entity: "Development",
     });

@@ -6,8 +6,8 @@ export const preFire = (data, req) => {
   const formattedBody = data.body;
 
   return {
-    queryF: formattedQuery,
-    paramsF: formattedParams,
-    bodyF: formattedBody,
+    queryF: formattedQuery || [],
+    paramsF: formattedParams || [],
+    bodyF: formattedBody || [],
   };
 };
