@@ -1,5 +1,5 @@
 {
-  "name": "sr-validator",
+  "name": "devio-validator",
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
