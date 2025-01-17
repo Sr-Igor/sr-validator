@@ -1,8 +1,14 @@
 export interface IValidationParams {
   /**
-   * É o nome que será utilizado na situaçÕes de erro para comport o texto
+   * Key da chave que irá construir o objeto de validação
    */
-  name: string;
+  key: string;
+
+  /**
+   * É o nome que será utilizado na situaçÕes de erro para comport o texto, Caso não seja informado, será utilizado o valor de key
+   * @default key
+   */
+  name?: string;
 
   /**
    * Utilizado quando field é do tipo date, para limitar a data ao dia de hoje

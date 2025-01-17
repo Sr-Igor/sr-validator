@@ -4,7 +4,7 @@ import { e } from "../../handlers/messages";
 //Types
 import { IValidationParams } from "../types";
 
-export default ({ name }: IValidationParams) => {
+export default ({ name, key }: IValidationParams) => {
   return z.preprocess(
     (a) => {
       if (a && typeof a === "string") {
@@ -20,8 +20,8 @@ export default ({ name }: IValidationParams) => {
       }
     },
     z.boolean({
-      required_error: e.required(name),
-      invalid_type_error: e.boolean(name),
+      required_error: e.required(name || key),
+      invalid_type_error: e.boolean(name || key),
     })
   );
 };

@@ -4,13 +4,13 @@ import { e } from "../../handlers/messages";
 //Types
 import { IValidationParams } from "../types";
 
-export default ({ name }: IValidationParams) => {
+export default ({ name, key }: IValidationParams) => {
   return z
     .string({
-      required_error: e.required(name),
-      invalid_type_error: e.string(name),
+      required_error: e.required(name || key),
+      invalid_type_error: e.string(name || key),
     })
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/, {
-      message: e.password(name),
+      message: e.password(name || key),
     });
 };

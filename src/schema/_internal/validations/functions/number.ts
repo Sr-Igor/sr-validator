@@ -4,33 +4,33 @@ import { e } from "../../handlers/messages";
 //Types
 import { IValidationParams } from "../types";
 
-export default ({ name, int, positive, max, min }: IValidationParams) => {
+export default ({ name, int, positive, max, min, key }: IValidationParams) => {
   let baseSchema = z.number({
-    required_error: e.required(name),
-    invalid_type_error: e.number(name),
+    required_error: e.required(name || key),
+    invalid_type_error: e.number(name || key),
   });
 
   if (int) {
     baseSchema = baseSchema.int({
-      message: e.int(name),
+      message: e.int(name || key),
     });
   }
 
   if (positive) {
     baseSchema = baseSchema.positive({
-      message: e.positive(name),
+      message: e.positive(name || key),
     });
   }
 
   if (max !== undefined) {
     baseSchema = baseSchema.max(max, {
-      message: e.max(name, max),
+      message: e.max(name || key, max),
     });
   }
 
   if (min !== undefined) {
     baseSchema = baseSchema.min(min, {
-      message: e.min(name, min),
+      message: e.min(name || key, min),
     });
   }
 

@@ -5,7 +5,6 @@ import { z } from "zod";
 import schema from "./schema";
 import { e } from "./schema/_internal/handlers/messages";
 import { IValidationParams } from "./schema/_internal/validations/types";
-import { th, tr } from "date-fns/locale";
 
 interface IValidator extends IValidationParams {
   method: keyof typeof schema.f;
@@ -13,15 +12,32 @@ interface IValidator extends IValidationParams {
   optional?: boolean;
 }
 
+type Relation = {
+  keys: string[];
+  type: keyof typeof schema.conditions;
+};
+
 const validator =
   (data: {
     body?: IValidator[];
     params?: IValidator[];
     query?: IValidator[];
+    relations?: {
+      query?: Relation[];
+      body?: Relation[];
+      params?: Relation[];
+    };
   }) =>
   async (req, res, next) => {
     try {
-      const { bodyF, paramsF, queryF } = schema.preFire(data, req);
+      const {
+        bodyF,
+        paramsF,
+        queryF,
+        bodyRelation,
+        paramsRelation,
+        queryRelation,
+      } = schema.preFire(data, req);
 
       //Each Map
       const eachMap = (local) => {
@@ -44,13 +60,13 @@ const validator =
 
             try {
               if (item.optional && item.nullable) {
-                objectMapper[item.name] = method.optional().nullable();
+                objectMapper[item.key] = method.optional().nullable();
               } else if (item.optional) {
-                objectMapper[item.name] = method.optional();
+                objectMapper[item.key] = method.optional();
               } else if (item.nullable) {
-                objectMapper[item.name] = method.nullable();
+                objectMapper[item.key] = method.nullable();
               } else {
-                objectMapper[item.name] = method;
+                objectMapper[item.key] = method;
               }
 
               resolve();
@@ -105,9 +121,15 @@ const validator =
           // schema.refinesBodyServer(cont, ctx, data);
         });
 
-      const query = z.object(queryObject).strict({
-        message: schema.e.notAllowed("query"),
-      });
+      const query = z
+        .object(queryObject)
+        .strict({
+          message: schema.e.notAllowed("query"),
+        })
+        .superRefine((cont, ctx) => {
+          schema.refinesServer(cont, ctx, queryRelation);
+        });
+
       const params = z.object(paramsObject).strict({
         message: schema.e.notAllowed("params"),
       });

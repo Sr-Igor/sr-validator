@@ -4,11 +4,11 @@ import { e } from "../../handlers/messages";
 //Types
 import { IValidationParams } from "../types";
 
-export default ({ name }: IValidationParams) => {
+export default ({ name, key }: IValidationParams) => {
   return z
     .string({
-      required_error: e.required(name),
-      invalid_type_error: e.string(name),
+      required_error: e.required(name || key),
+      invalid_type_error: e.string(name || key),
     })
     .refine(
       (value) => {
@@ -50,6 +50,6 @@ export default ({ name }: IValidationParams) => {
         return true;
       },
 
-      { message: e.cnpj(name) }
+      { message: e.cnpj(name || key) }
     );
 };

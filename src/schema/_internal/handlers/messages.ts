@@ -25,17 +25,36 @@ export const e = {
     `${field} deve ser igual ao campo ${ref.toLowerCase()}`,
   cnpj: (field) => `${field} deve ser válido`,
   coordinates: (field) => `${field} deve ser válido`,
-  mutual: (field1, field2) =>
-    `${field1} precisa ser enviado junto com ${field2?.toLowerCase()}`,
+
   major: (field1, field2) =>
     `${field1} não pode ser maior que ${field2?.toLowerCase()}`,
   orArray: (fields) =>
     `Um dos itens: '${fields
       .map((i) => i?.toLowerCase())
       ?.join(", ")}', é obrigatório`,
-  unicArray: (fields) =>
-    `Os itens: '${fields
+  reverse: (fields) =>
+    `Os campos ${fields
       .map((i) => i?.toLowerCase())
-      ?.join(", ")}', não podem ser enviados ao mesmo tempo`,
+      ?.join(", ")
+      ?.replace(/,([^,]*)$/, " e$1")}, não podem ser enviados ao mesmo tempo`,
+  mutual: (fields) =>
+    `Os campos ${fields
+      .map((i) => i?.toLowerCase())
+      ?.join(", ")
+      ?.replace(/,([^,]*)$/, " e$1")}, devem ser enviados juntos`,
+  oneOfRequired: (fields) =>
+    `Um dos campos ${fields
+      .map((i) => i?.toLowerCase())
+      ?.join(", ")
+      ?.replace(/,([^,]*)$/, " ou$1")}, deve ser enviado`,
+  equal: (fields) =>
+    `Os campos ${fields
+      .map((i) => i?.toLowerCase())
+      ?.join(", ")
+      ?.replace(/,([^,]*)$/, " e$1")}, devem ser iguais`,
+
+  notGreater: (ref, field) =>
+    `O valor de ${field?.toLowerCase()} deve ser menor que ${ref?.toLowerCase()}`,
+
   null: (field) => `${field} deve ser nulo`,
 };

@@ -4,21 +4,21 @@ import { e } from "../../handlers/messages";
 //Types
 import { IValidationParams } from "../types";
 
-export default ({ name, max, min, format }: IValidationParams) => {
+export default ({ name, max, min, format, key }: IValidationParams) => {
   let schema = z.string({
-    required_error: e.required(name),
-    invalid_type_error: e.string(name),
+    required_error: e.required(name || key),
+    invalid_type_error: e.string(name || key),
   });
 
   if (min !== undefined) {
     schema = schema.min(min, {
-      message: e.length(name, min),
+      message: e.length(name || key, min),
     });
   }
 
   if (max !== undefined) {
     schema = schema.max(max, {
-      message: e.length(name, max),
+      message: e.length(name || key, max),
     });
   }
 
