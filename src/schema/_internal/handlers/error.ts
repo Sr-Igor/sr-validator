@@ -15,8 +15,6 @@ export const handleError = (err) => {
       const keys = issue?.keys?.join(".");
       const message = issue.message;
 
-      console.log(keys);
-
       if (path.includes("params") && objectError.params) {
         if (path === "params") {
           const errors = keys.split(".");
