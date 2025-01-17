@@ -86,6 +86,35 @@ const validator =
       const queryObject = eachMap(queryF);
       const bodyObject = eachMap(bodyF);
 
+      const modifiersValidator = (cont, ctx, refine) => {
+        const keys = Object.keys(cont);
+
+        keys?.forEach((item) => {
+          //@ts-ignore
+          const optional = bodyObject[item].isOptional();
+          //@ts-ignore
+          const nullable = bodyObject[item].isNullable();
+
+          if (cont[item] === "" && !nullable) {
+            if (optional) {
+              ctx.addIssue({
+                code: "custom",
+                message: e.notEmpty(item),
+                path: [item],
+              });
+            } else {
+              ctx.addIssue({
+                code: "custom",
+                message: e.required(item),
+                path: [item],
+              });
+            }
+          }
+        });
+
+        schema.refinesServer(cont, ctx, refine);
+      };
+
       //Structure the schema
       const body = z
         .object(bodyObject)
@@ -93,32 +122,7 @@ const validator =
           message: schema.e.notAllowed("body"),
         })
         .superRefine((cont, ctx) => {
-          const keys = Object.keys(cont);
-
-          keys?.forEach((item) => {
-            //@ts-ignore
-            const optional = bodyObject[item].isOptional();
-            //@ts-ignore
-            const nullable = bodyObject[item].isNullable();
-
-            if (cont[item] === "" && !nullable) {
-              if (optional) {
-                ctx.addIssue({
-                  code: "custom",
-                  message: e.notEmpty(item),
-                  path: [item],
-                });
-              } else {
-                ctx.addIssue({
-                  code: "custom",
-                  message: e.required(item),
-                  path: [item],
-                });
-              }
-            }
-          });
-
-          // schema.refinesBodyServer(cont, ctx, data);
+          modifiersValidator(cont, ctx, bodyRelation);
         });
 
       const query = z
@@ -127,12 +131,17 @@ const validator =
           message: schema.e.notAllowed("query"),
         })
         .superRefine((cont, ctx) => {
-          schema.refinesServer(cont, ctx, queryRelation);
+          modifiersValidator(cont, ctx, queryRelation);
         });
 
-      const params = z.object(paramsObject).strict({
-        message: schema.e.notAllowed("params"),
-      });
+      const params = z
+        .object(paramsObject)
+        .strict({
+          message: schema.e.notAllowed("params"),
+        })
+        .superRefine((cont, ctx) => {
+          modifiersValidator(cont, ctx, paramsRelation);
+        });
 
       //@ts-ignore
       if (req?.forDoc) return { body, query, params };
@@ -150,9 +159,7 @@ const validator =
         params: req.params,
       });
 
-      //Check if the nullable values are empty
       Object.keys(resolved?.body || []).forEach((item) => {
-        //@ts-ignore
         const nullable = bodyObject[item].isNullable();
 
         if (nullable && resolved.body[item] === "") {
