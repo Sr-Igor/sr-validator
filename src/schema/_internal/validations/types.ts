@@ -1,3 +1,5 @@
+import { ZodSchema } from "zod";
+
 export interface IValidationParams {
   /**
    * Key da chave que irá construir o objeto de validação
@@ -51,4 +53,10 @@ export interface IValidationParams {
    * @default undefined
    */
   format?: "upper" | "lower";
+}
+
+export interface ICustomValidation {
+  key: string;
+  name?: string;
+  custom: ZodSchema;
 }

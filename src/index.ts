@@ -4,10 +4,18 @@
 import { z } from "zod";
 import schema from "./schema";
 import { e } from "./schema/_internal/handlers/messages";
-import { IValidationParams } from "./schema/_internal/validations/types";
+import {
+  IValidationParams,
+  ICustomValidation,
+} from "./schema/_internal/validations/types";
 
 interface IValidator extends IValidationParams {
   method: keyof typeof schema.f;
+  nullable?: boolean;
+  optional?: boolean;
+}
+
+interface ICustomValidator extends ICustomValidation {
   nullable?: boolean;
   optional?: boolean;
 }
@@ -19,9 +27,9 @@ type Relation = {
 
 const validator =
   (data: {
-    body?: IValidator[];
-    params?: IValidator[];
-    query?: IValidator[];
+    body?: (IValidator | ICustomValidation)[];
+    params?: (IValidator | ICustomValidation)[];
+    query?: (IValidator | ICustomValidation)[];
     relations?: {
       query?: Relation[];
       body?: Relation[];
@@ -46,12 +54,12 @@ const validator =
         new Promise((resolve) => {
           local?.forEach(async (item) => {
             const funcMethod = schema.f[item.method];
-            if (!funcMethod)
+            if (!funcMethod && !item.custom)
               throw new Error(`Método "${item.method}" não encontrado!`);
 
             let method;
             try {
-              method = funcMethod(item);
+              method = item.custom || funcMethod(item);
             } catch {
               throw new Error(
                 `Ocorreu um erro na função validadora ${item.method}`
@@ -86,14 +94,14 @@ const validator =
       const queryObject = eachMap(queryF);
       const bodyObject = eachMap(bodyF);
 
-      const modifiersValidator = (cont, ctx, refine) => {
+      const modifiersValidator = (obj, cont, ctx, refine) => {
         const keys = Object.keys(cont);
 
         keys?.forEach((item) => {
           //@ts-ignore
-          const optional = bodyObject[item].isOptional();
+          const optional = obj[item]?.isOptional();
           //@ts-ignore
-          const nullable = bodyObject[item].isNullable();
+          const nullable = obj[item]?.isNullable();
 
           if (cont[item] === "" && !nullable) {
             if (optional) {
@@ -122,7 +130,7 @@ const validator =
           message: schema.e.notAllowed("body"),
         })
         .superRefine((cont, ctx) => {
-          modifiersValidator(cont, ctx, bodyRelation);
+          modifiersValidator(bodyObject, cont, ctx, bodyRelation);
         });
 
       const query = z
@@ -131,7 +139,7 @@ const validator =
           message: schema.e.notAllowed("query"),
         })
         .superRefine((cont, ctx) => {
-          modifiersValidator(cont, ctx, queryRelation);
+          modifiersValidator(queryObject, cont, ctx, queryRelation);
         });
 
       const params = z
@@ -140,7 +148,7 @@ const validator =
           message: schema.e.notAllowed("params"),
         })
         .superRefine((cont, ctx) => {
-          modifiersValidator(cont, ctx, paramsRelation);
+          modifiersValidator(paramsObject, cont, ctx, paramsRelation);
         });
 
       //@ts-ignore
