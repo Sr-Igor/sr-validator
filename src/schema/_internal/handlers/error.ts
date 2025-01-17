@@ -15,17 +15,35 @@ export const handleError = (err) => {
       const keys = issue?.keys?.join(".");
       const message = issue.message;
 
+      console.log(keys);
+
       if (path.includes("params") && objectError.params) {
-        objectError.params[
-          path === "params" ? keys : path.replace("params.", "")
-        ] = message;
+        if (path === "params") {
+          const errors = keys.split(".");
+          errors.forEach((error) => {
+            objectError.query[error] = message;
+          });
+        } else {
+          objectError.params[path.replace("params.", "")] = message;
+        }
       } else if (path.includes("query") && objectError.query) {
-        objectError.query[
-          path === "query" ? keys : path.replace("query.", "")
-        ] = message;
+        if (path === "query") {
+          const errors = keys.split(".");
+          errors.forEach((error) => {
+            objectError.query[error] = message;
+          });
+        } else {
+          objectError.query[path.replace("query.", "")] = message;
+        }
       } else if (path.includes("body") && objectError.body) {
-        objectError.body[path === "body" ? keys : path.replace("body.", "")] =
-          message;
+        if (path === "query") {
+          const errors = keys.split(".");
+          errors.forEach((error) => {
+            objectError.query[error] = message;
+          });
+        } else {
+          objectError.body[path.replace("body.", "")] = message;
+        }
       }
     });
 
