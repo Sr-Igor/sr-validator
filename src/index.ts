@@ -176,7 +176,10 @@ const validator =
       });
 
       // Set the values
-      req.b = resolved.body;
+      req.b = {
+        ...resolved.body,
+        ...(req?.uploads || {}),
+      };
       req.q = resolved.query;
       req.p = resolved.params;
 
