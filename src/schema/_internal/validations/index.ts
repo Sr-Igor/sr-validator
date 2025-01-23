@@ -2,6 +2,9 @@
 import year from "./functions/year";
 import numeric from "./functions/number";
 
+//Array
+import string_array from "./functions/string_array";
+
 //Strings
 import cpf from "./functions/cpf";
 import cep from "./functions/cep";
@@ -44,4 +47,7 @@ export const f = {
 
   //Null
   nullish,
+
+  //Array
+  string_array,
 };

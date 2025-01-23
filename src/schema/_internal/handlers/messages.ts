@@ -57,4 +57,5 @@ export const e = {
     `O valor de ${field?.toLowerCase()} deve ser menor que ${ref?.toLowerCase()}`,
 
   null: (field) => `${field} deve ser nulo`,
+  array: (field) => `${field} deve ser um array`,
 };
