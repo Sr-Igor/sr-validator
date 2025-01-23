@@ -152,7 +152,7 @@ const validator =
         });
 
       //@ts-ignore
-      if (req?.forDoc) return { body, query, params };
+      if (req?.schema) return { body, query, params };
 
       //Schema
       const schemaZod = z.object({
