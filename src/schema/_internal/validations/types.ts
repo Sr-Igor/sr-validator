@@ -59,4 +59,7 @@ export interface ICustomValidation {
   key: string;
   name?: string;
   custom: ZodSchema;
+  coerse?: string;
+  column?: string;
+  model?: string;
 }
