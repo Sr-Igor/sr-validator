@@ -21,6 +21,9 @@ interface IValidator extends IValidationParams {
 interface ICustomValidator extends ICustomValidation {
   nullable?: boolean;
   optional?: boolean;
+  coerse?: string;
+  column?: string;
+  model?: string;
 }
 
 type Relation = {
