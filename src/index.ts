@@ -13,6 +13,9 @@ interface IValidator extends IValidationParams {
   method: keyof typeof schema.f;
   nullable?: boolean;
   optional?: boolean;
+  coerse?: string;
+  column?: string;
+  model?: string;
 }
 
 interface ICustomValidator extends ICustomValidation {
