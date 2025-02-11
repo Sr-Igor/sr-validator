@@ -58,4 +58,5 @@ export const e = {
 
   null: (field) => `${field} deve ser nulo`,
   array: (field) => `${field} deve ser um array`,
+  object: (field) => `${field} deve ser um objeto`,
 };

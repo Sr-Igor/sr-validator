@@ -95,12 +95,42 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
       return objectMapper;
     };
 
+    const queryFixed = {
+      select: z
+        .preprocess((data, ctx) => {
+          try {
+            const parse = data ? JSON.parse(data) : undefined;
+            return parse;
+          } catch {
+            ctx.addIssue({
+              code: "custom",
+              message: e.object("select"),
+            });
+          }
+        }, z.any())
+        .optional(),
+
+      include: z
+        .preprocess((data, ctx) => {
+          try {
+            const parse = data ? JSON.parse(data) : undefined;
+            return parse;
+          } catch {
+            ctx.addIssue({
+              code: "custom",
+              message: e.object("include"),
+            });
+          }
+        }, z.any())
+        .optional(),
+    };
+
     //Params
     const paramsObject = eachMap(paramsF);
-    const queryObject = eachMap(queryF);
+    const queryObject = { ...eachMap(queryF), ...queryFixed };
     const bodyObject = eachMap(bodyF);
 
-    const modifiersValidator = (obj, cont, ctx, refine) => {
+    const modifiersValidator = (obj, cont, ctx, refine, local) => {
       const keys = Object.keys(cont);
 
       keys?.forEach((item) => {
@@ -126,6 +156,20 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
         }
       });
 
+      if (local === "query" && cont.select && cont.include) {
+        ctx.addIssue({
+          code: "custom",
+          message: e.reverse(["select", "include"]),
+          path: ["select"],
+        });
+
+        ctx.addIssue({
+          code: "custom",
+          message: e.reverse(["select", "include"]),
+          path: ["include"],
+        });
+      }
+
       schema.refinesServer(cont, ctx, refine);
     };
 
@@ -136,7 +180,7 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
         message: schema.e.notAllowed("body"),
       })
       .superRefine((cont, ctx) => {
-        modifiersValidator(bodyObject, cont, ctx, bodyRelation);
+        modifiersValidator(bodyObject, cont, ctx, bodyRelation, "body");
       });
 
     const query = z
@@ -145,7 +189,7 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
         message: schema.e.notAllowed("query"),
       })
       .superRefine((cont, ctx) => {
-        modifiersValidator(queryObject, cont, ctx, queryRelation);
+        modifiersValidator(queryObject, cont, ctx, queryRelation, "query");
       });
 
     const params = z
@@ -154,7 +198,7 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
         message: schema.e.notAllowed("params"),
       })
       .superRefine((cont, ctx) => {
-        modifiersValidator(paramsObject, cont, ctx, paramsRelation);
+        modifiersValidator(paramsObject, cont, ctx, paramsRelation, "params");
       });
 
     //@ts-ignore
@@ -181,6 +225,16 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
       }
     });
 
+    const select = Object.keys(resolved?.query?.select || {})?.length
+      ? resolved?.query?.select
+      : undefined;
+    const include = Object.keys(resolved?.query?.include || {})?.length
+      ? resolved?.query?.include
+      : undefined;
+
+    delete resolved.query.select;
+    delete resolved.query.include;
+
     // Set the values
     req.b = {
       ...resolved.body,
@@ -188,6 +242,8 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
     };
     req.q = resolved.query;
     req.p = resolved.params;
+    req.select = select;
+    req.include = include;
 
     //Clean the values
     req.body = {};

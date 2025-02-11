@@ -17,8 +17,8 @@ export const handleError = (err) => {
 
       if (path.includes("params") && objectError.params) {
         if (path === "params") {
-          const errors = keys.split(".");
-          errors.forEach((error) => {
+          const errors = keys?.split(".");
+          errors?.forEach((error) => {
             objectError.query[error] = message;
           });
         } else {
@@ -26,8 +26,8 @@ export const handleError = (err) => {
         }
       } else if (path.includes("query") && objectError.query) {
         if (path === "query") {
-          const errors = keys.split(".");
-          errors.forEach((error) => {
+          const errors = keys?.split(".");
+          errors?.forEach((error) => {
             objectError.query[error] = message;
           });
         } else {
@@ -35,8 +35,8 @@ export const handleError = (err) => {
         }
       } else if (path.includes("body") && objectError.body) {
         if (path === "query") {
-          const errors = keys.split(".");
-          errors.forEach((error) => {
+          const errors = keys?.split(".");
+          errors?.forEach((error) => {
             objectError.query[error] = message;
           });
         } else {
