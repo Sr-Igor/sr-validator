@@ -95,11 +95,27 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
       return objectMapper;
     };
 
+    function parseBooleanStrings(obj) {
+      return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => {
+          if (value === "true") return [key, true];
+          if (value === "false") return [key, false];
+          return [key, value];
+        })
+      );
+    }
+
     const queryFixed = {
       select: z
         .preprocess((data, ctx) => {
           try {
-            const parse = data ? JSON.parse(data) : undefined;
+            let parse = {};
+            if (data && typeof data === "object") {
+              parse = parseBooleanStrings(data);
+            } else {
+              const parse = data ? JSON.parse(data) : undefined;
+            }
+
             return parse;
           } catch {
             ctx.addIssue({
@@ -113,7 +129,13 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
       include: z
         .preprocess((data, ctx) => {
           try {
-            const parse = data ? JSON.parse(data) : undefined;
+            let parse = {};
+            if (data && typeof data === "object") {
+              parse = parseBooleanStrings(data);
+            } else {
+              const parse = data ? JSON.parse(data) : undefined;
+            }
+
             return parse;
           } catch {
             ctx.addIssue({
@@ -244,6 +266,8 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
     req.p = resolved.params;
     req.select = select;
     req.include = include;
+
+    console.log(include);
 
     //Clean the values
     req.body = {};
