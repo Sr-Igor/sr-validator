@@ -95,61 +95,9 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
       return objectMapper;
     };
 
-    function parseBooleanStrings(obj) {
-      return Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => {
-          if (value === "true") return [key, true];
-          if (value === "false") return [key, false];
-          return [key, value];
-        })
-      );
-    }
-
-    const queryFixed = {
-      select: z
-        .preprocess((data, ctx) => {
-          try {
-            let parse = {};
-            if (data && typeof data === "object") {
-              parse = parseBooleanStrings(data);
-            } else {
-              const parse = data ? JSON.parse(data) : undefined;
-            }
-
-            return parse;
-          } catch {
-            ctx.addIssue({
-              code: "custom",
-              message: e.object("select"),
-            });
-          }
-        }, z.any())
-        .optional(),
-
-      include: z
-        .preprocess((data, ctx) => {
-          try {
-            let parse = {};
-            if (data && typeof data === "object") {
-              parse = parseBooleanStrings(data);
-            } else {
-              const parse = data ? JSON.parse(data) : undefined;
-            }
-
-            return parse;
-          } catch {
-            ctx.addIssue({
-              code: "custom",
-              message: e.object("include"),
-            });
-          }
-        }, z.any())
-        .optional(),
-    };
-
     //Params
     const paramsObject = eachMap(paramsF);
-    const queryObject = { ...eachMap(queryF), ...queryFixed };
+    const queryObject = eachMap(queryF);
     const bodyObject = eachMap(bodyF);
 
     const modifiersValidator = (obj, cont, ctx, refine, local) => {

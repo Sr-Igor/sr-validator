@@ -24,6 +24,9 @@ import boolean from "./functions/boolean";
 //Null
 import nullish from "./functions/null";
 
+//Prisma
+import prisma from "./functions/prisma";
+
 export const f = {
   //Numbers
   year,
@@ -50,4 +53,7 @@ export const f = {
 
   //Array
   string_array,
+
+  //Prisma
+  prisma,
 };
