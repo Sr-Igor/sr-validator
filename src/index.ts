@@ -215,8 +215,6 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
     req.select = select;
     req.include = include;
 
-    console.log(include);
-
     //Clean the values
     req.body = {};
     req.query = {};
