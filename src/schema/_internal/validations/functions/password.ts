@@ -10,7 +10,10 @@ export default ({ name, key }: IValidationParams) => {
       required_error: e.required(name || key),
       invalid_type_error: e.string(name || key),
     })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/, {
-      message: e.password(name || key),
-    });
+    .regex(
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/,
+      {
+        message: e.password(name || key),
+      }
+    );
 };
