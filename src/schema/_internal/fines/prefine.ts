@@ -7,10 +7,10 @@ export const preFire = (data, req) => {
 
   const relations = data.relations;
 
-  const mapRelations = (items) => {
+  const mapRelations = (items, formatted) => {
     return items?.map((item) => {
       const keys = item.keys.map((key) => {
-        const defined = formattedQuery.find((query) => query.key === key);
+        const defined = formatted.find((query) => query.key === key);
         return defined;
       });
 
@@ -22,9 +22,9 @@ export const preFire = (data, req) => {
   };
 
   //Query
-  const queryRelation = mapRelations(relations?.query || []);
-  const paramsRelation = mapRelations(relations?.params || []);
-  const bodyRelation = mapRelations(relations?.body || []);
+  const queryRelation = mapRelations(relations?.query || [], formattedQuery);
+  const paramsRelation = mapRelations(relations?.params || [], formattedParams);
+  const bodyRelation = mapRelations(relations?.body || [], formattedBody);
 
   return {
     queryF: formattedQuery || [],
