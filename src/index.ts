@@ -8,6 +8,7 @@ import {
   IValidationParams,
   ICustomValidation,
 } from "./schema/_internal/validations/types";
+import mocks from "./mocks";
 
 interface IValidator extends IValidationParams {
   method: keyof typeof schema.f;
@@ -237,4 +238,4 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
   }
 };
 
-export { validator, IValidationParams, IValidatorRequest };
+export { validator, IValidationParams, IValidatorRequest, mocks };
