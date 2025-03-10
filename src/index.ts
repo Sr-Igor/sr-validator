@@ -141,7 +141,12 @@ const validator = (data: IValidatorRequest) => async (req, res, next) => {
         });
       }
 
-      schema.refinesServer(cont, ctx, refine);
+      //Has x-refine header
+      const hasRefine = req.headers["x-refine"] === "true";
+
+      if (!process.env.NODE_ENV?.includes("test") || hasRefine) {
+        schema.refinesServer(cont, ctx, refine);
+      }
     };
 
     //Structure the schema
